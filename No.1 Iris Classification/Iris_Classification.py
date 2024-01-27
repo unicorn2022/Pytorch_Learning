@@ -15,7 +15,7 @@ from Iris_Classification_Network import Iris_Classification_Network
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 # 从文件中加载数据
-custom_dataset = Iris_Data_Loader('./Iris_data.txt')
+custom_dataset = Iris_Data_Loader('data/Iris_data.txt')
 
 # 划分数据集: 训练集(7), 验证集(2), 测试集(1)
 train_size = int(len(custom_dataset) * 0.7)
@@ -75,6 +75,7 @@ def main(lr = 0.005, epochs = 20):
         # 初始化正确率, 采样个数
         acc_num = torch.zeros(1).to(device)
         sample_num = 0
+        train_acc = 0
 
         # 进行训练
         # 可视化进度条
@@ -112,7 +113,7 @@ def main(lr = 0.005, epochs = 20):
         print("train epoch[{}/{}] loss:{:.3f} 训练集准确率:{:.3f} 验证集准确率:{:.3f}".format(epoch + 1, epochs, loss, train_acc, valid_acc))
 
         # 保存模型
-        if (epoch + 1) % 10 == 0:
+        if (epoch + 1) % 100 == 0:
             torch.save(model.state_dict(), os.path.join(save_path, 'Iris_epoch_{}.pth'.format(epoch + 1)))
     print('训练完成!')
 
@@ -121,4 +122,4 @@ def main(lr = 0.005, epochs = 20):
     print('测试集正确率: ', test_acc)
 
 if __name__ == '__main__':
-    main(lr=0.005, epochs=20)
+    main(lr=0.005, epochs=200)
