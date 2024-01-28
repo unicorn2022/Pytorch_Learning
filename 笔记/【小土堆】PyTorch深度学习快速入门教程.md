@@ -23,3 +23,5 @@
   ```
 
 - **Dataloader**：将数据打包，提供给网络使用
+
+<img src="AssetMarkdown/image-20240127232050876.png" alt="image-20240127232050876" style="zoom:80%;" />
