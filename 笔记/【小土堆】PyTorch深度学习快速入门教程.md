@@ -25,3 +25,61 @@
 - **Dataloader**：将数据打包，提供给网络使用
 
 <img src="AssetMarkdown/image-20240127232050876.png" alt="image-20240127232050876" style="zoom:80%;" />
+
+# 二、Tensorboard
+
+Python生成日志文件：
+
+- 坐标轴：观察网络的`loss`
+
+  ```python
+  from torch.utils.tensorboard import SummaryWriter
+  
+  writer = SummaryWriter(
+      log_dir='logs' # 存储路径, 建议每次训练使用不同的文件夹, 以免覆盖之前的训练结果
+  )
+  
+  # 坐标轴
+  for i in range(100):
+      writer.add_scalar(
+          tag='y=x^2',        # 坐标轴名称
+          scalar_value=i**2,  # Y轴值
+          global_step=i       # X轴值
+      )
+  
+  writer.close()
+  ```
+
+- 图像：观察网络的图像输入or输出
+
+  ```python
+  # 图片
+  img_path = 'data/train/ants/0013035.jpg'
+  img_PIL = Image.open(img_path)
+  img_array = np.array(img_PIL)
+  writer.add_image(
+      tag='test',             # 图片名称
+      img_tensor=img_array,   # 图片数据
+      global_step=0,          # 第几张图片
+      dataformats='HWC'       # 图片数据格式(HWC:高度、宽度、通道数)
+  )
+  ```
+
+使用`Tensorboard`打开日志文件：
+
+```bash
+tensorboard --logdir=logs --port=6007
+```
+
+查看port（如`6007`）被哪些进程占用：（可以得到进程PID）
+
+```bash
+netstat -ano | findstr 6007
+```
+
+查看PID（如`20288`）对应的进程
+
+```bash
+tasklist | findstr 20288
+```
+
