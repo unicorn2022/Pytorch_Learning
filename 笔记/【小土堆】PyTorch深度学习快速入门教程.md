@@ -1,8 +1,6 @@
 [TOC]
 
-# 一、数据加载
-
-## 1.1	Dataset & Dataloader
+# 一、数据加载：Dataset & Dataloader
 
 - **Dataset**：提供一种方式，获取`data`及其`label`
 
@@ -83,3 +81,21 @@ netstat -ano | findstr 6007
 tasklist | findstr 20288
 ```
 
+# 三、Transforms
+
+<img src="AssetMarkdown/image-20240129232207604.png" alt="image-20240129232207604" style="zoom:80%;" />
+
+## 3.1	将PIL图片转为Tensor类型
+
+```python
+from torchvision import transforms
+from PIL import Image
+
+# 1. 将PIL图片转换为Tensor
+img_path = "data/train/ants/0013035.jpg"
+img = Image.open(img_path)
+img_tensor = transforms.ToTensor()(img)
+```
+
+- **Tensor**：包装了神经网络必须的一些属性
+- **ToTensor()**：将PIL、ndarray格式的图片，转化为Tensor格式
