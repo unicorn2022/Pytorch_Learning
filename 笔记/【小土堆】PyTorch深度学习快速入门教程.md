@@ -99,3 +99,17 @@ img_tensor = transforms.ToTensor()(img)
 
 - **Tensor**：包装了神经网络必须的一些属性
 - **ToTensor()**：将PIL、ndarray格式的图片，转化为Tensor格式
+
+## 3.2	常用Transforms
+
+- **输入**：
+  - **PIL**：`Image.open(path)`
+  - **tensor**：`transforms.ToTensor()(PILImage)`
+  - **ndarray**：`cv.imread(path)`
+- **作用**
+  - **将PIL、ndarray转化为Tensor**：`transforms.ToTensor()(PILImage)`
+  - **将Tensor、ndarray转化为PIL**：`transforms.ToPILImage()(tensor)`
+  - **按通道归一化Tensor图像**：`transforms.Normalize(mean, std)(tensor)`
+  - **更改PIL图像大小**：`transforms.Resize(size)(PILImage)`
+  - **组合多个作用**：`transforms.Compose([transform_1, transform_2...])`
+  - **随机裁剪PIL图像**：`transforms.RandomCrop(size)(PILImage)`
