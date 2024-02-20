@@ -1,28 +1,59 @@
 [TOC]
 
-# 一、数据加载：Dataset & Dataloader
+# 一、Dataset & Dataloader
 
-- **Dataset**：提供一种方式，获取`data`及其`label`
+## 1.1	Dataset：提供一种方式，获取`data`及其`label`
 
-  - 如何获取单个`data`及其`label`
-  - 计算总共有多少个`data`
+- 如何获取单个`data`及其`label`：`__getitem__(self, index)`
+- 计算总共有多少个`data`：`__len__(self)`
 
-  ```python
-  from torch.utils.data import Dataset
-  class MyDataset(Dataset):
-      def __init__(self, data_path):
-          ...
-  
-      def __len__(self):
-          ...
-      
-      def __getitem__(self, index):
-          ...
-  ```
+```python
+from torch.utils.data import Dataset
+class MyDataset(Dataset):
+    def __init__(self, data_path):
+        pass
+    
+    def __getitem__(self, index):
+        pass
+    
+    def __len__(self):
+        pass
+```
 
-- **Dataloader**：将数据打包，提供给网络使用
+## 1.2	Dataloader：将数据打包，提供给网络使用
 
 <img src="AssetMarkdown/image-20240127232050876.png" alt="image-20240127232050876" style="zoom:80%;" />
+
+```python
+import torchvision
+from torch.utils.data import DataLoader
+from torch.utils.tensorboard import SummaryWriter
+
+# 测试数据集
+test_data = torchvision.datasets.CIFAR10(root='./dataset', train=False, transform=torchvision.transforms.ToTensor())
+if __name__ == '__main__':
+    img, target = test_data[0]
+    # print(img.shape)    # torch.Size([3, 32, 32])
+
+# 测试数据集的加载器
+test_loader = DataLoader(
+    dataset=test_data,  # 数据集
+    batch_size=64,      # 每个batch取多少个样本
+    shuffle=True,       # 是否打乱
+    num_workers=0,      # 读取的线程个数
+    drop_last=True      # 是否丢弃最后一个batch
+)
+if __name__ == '__main__':
+    writer = SummaryWriter('./logs')
+    for epoch in range(2):
+        step = 0
+        for data in test_loader:
+            imgs, targets = data
+            # print(imgs.shape)   # torch.Size([batch_size, 3, 32, 32])
+            writer.add_images('Epoch: {}'.format(epoch), imgs, step)
+            step += 1
+    writer.close()
+```
 
 # 二、Tensorboard
 
