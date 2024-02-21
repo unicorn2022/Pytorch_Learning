@@ -6,7 +6,7 @@
 from torch.utils.data import DataLoader, Dataset
 ```
 
-## 1.1	Dataset：提供一种方式，获取`data`及其`label`
+## 1.1	Dataset：提供一种方式，获取data及其label
 
 - 初始化：`__init(self, ...)__`
 - 如何获取单个`data`及其`label`：`__getitem__(self, index)`
@@ -115,7 +115,7 @@ from torch.utils.tensorboard import SummaryWriter
   )
   ```
 
-## 2.2	使用`Tensorboard`打开日志文件：
+## 2.2	使用Tensorboard打开日志文件：
 
 ```bash
 tensorboard --logdir=logs --port=6007
@@ -231,5 +231,44 @@ if __name__ == '__main__':
     input = torch.tensor(1.0)
     output = net(input)
     print(output)
+```
+
+## 5.2	卷积层：`nn.Conv2d(...)`
+
+> torch.nn是对torch.nn.functional的封装
+
+### 5.2.1	卷积操作
+
+<img src="AssetMarkdown/image-20240221130213085.png" alt="image-20240221130213085" style="zoom:80%;" />
+
+<img src="AssetMarkdown/image-20240221131633782.png" alt="image-20240221131633782" style="zoom:80%;" />
+
+```python
+import torch
+import torch.nn as nn
+import torch.nn.functional as F
+
+input = torch.tensor(
+    [[1, 2, 0, 3, 1],
+    [0, 1, 2, 3, 1],
+    [1, 2, 1, 0, 0],
+    [5, 2, 3, 1, 1],
+    [2, 1, 0, 1, 1]])
+
+kernel = torch.tensor(
+    [[1, 2, 1],
+    [0, 1, 0],
+    [2, 1, 0]])
+
+input = input.view(1, 1, 5, 5)
+
+kernel = kernel.view(1, 1, 3, 3)
+
+output = F.conv2d(
+    input=input,   # 输入:     (batch_size, in_channel, input_H, input_W)
+    weight=kernel, # 卷积核:   (out_channel, in_channel/groups, kernel_H, kernel_W)
+    stride=1,      # 步长
+    padding=1,     # 填充
+)
 ```
 
