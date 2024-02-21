@@ -1,26 +1,43 @@
 [TOC]
 
-# 一、Dataset & Dataloader
+# 一、准备数据：Dataset & Dataloader
+
+```python
+from torch.utils.data import DataLoader, Dataset
+```
 
 ## 1.1	Dataset：提供一种方式，获取`data`及其`label`
 
+- 初始化：`__init(self, ...)__`
 - 如何获取单个`data`及其`label`：`__getitem__(self, index)`
 - 计算总共有多少个`data`：`__len__(self)`
 
 ```python
+import os
+from PIL import Image
 from torch.utils.data import Dataset
+
 class MyDataset(Dataset):
-    def __init__(self, data_path):
-        pass
-    
+    def __init__(self, root_dir, label_dir):
+        self.root_dir = root_dir
+        self.label_dir = label_dir
+        path = os.path.join(self.root_dir, self.label_dir)
+        self.img_name_list = os.listdir(path)
+
     def __getitem__(self, index):
-        pass
-    
+        img_name = self.img_name_list[index]
+        img_path = os.path.join(self.root_dir, self.label_dir, img_name)
+        img = Image.open(img_path)
+        label = self.label_dir
+        return img, label
+
     def __len__(self):
-        pass
+        return len(self.img_name_list)
 ```
 
 ## 1.2	Dataloader：将数据打包，提供给网络使用
+
+https://pytorch.org/docs/stable/data.html#torch.utils.data.DataLoader
 
 <img src="AssetMarkdown/image-20240127232050876.png" alt="image-20240127232050876" style="zoom:80%;" />
 
@@ -55,9 +72,13 @@ if __name__ == '__main__':
     writer.close()
 ```
 
-# 二、Tensorboard
+# 二、记录日志：Tensorboard
 
-Python生成日志文件：
+```python
+from torch.utils.tensorboard import SummaryWriter
+```
+
+## 2.1	Python生成日志文件
 
 - 坐标轴：观察网络的`loss`
 
@@ -94,7 +115,7 @@ Python生成日志文件：
   )
   ```
 
-使用`Tensorboard`打开日志文件：
+## 2.2	使用`Tensorboard`打开日志文件：
 
 ```bash
 tensorboard --logdir=logs --port=6007
@@ -112,7 +133,11 @@ netstat -ano | findstr 6007
 tasklist | findstr 20288
 ```
 
-# 三、Transforms
+# 三、数据变换工具箱：Transforms
+
+```python
+from torchvision import transforms
+```
 
 <img src="AssetMarkdown/image-20240129232207604.png" alt="image-20240129232207604" style="zoom:80%;" />
 
@@ -145,7 +170,13 @@ img_tensor = transforms.ToTensor()(img)
   - **组合多个作用**：`transforms.Compose([transform_1, transform_2...])`
   - **随机裁剪PIL图像**：`transforms.RandomCrop(size)(PILImage)`
 
-# 四、torchvision数据集
+# 四、官方数据集：torchvision.datasets
+
+```python
+import torchvision.datasets
+```
+
+## 4.1	CIFAR10数据集
 
 ```python
 import torchvision
@@ -166,5 +197,39 @@ for i in range(10):
     img_tensor, label = train_set[i]
     writter.add_image('train_set', img_tensor, i)
 writter.close()
+```
+
+# 五、神经网络的搭建：torch.nn
+
+https://pytorch.org/docs/stable/nn.html
+
+```python
+import torch.nn
+```
+
+## 5.1	nn.Module：神经网络的模板
+
+https://pytorch.org/docs/stable/generated/torch.nn.Module.html#torch.nn.Module
+
+- 初始化：`__init(self, ...)__`
+- 给定输入，如何得到输出：`__forward(self, input)__`
+
+```python
+import torch
+import torch.nn as nn
+
+class Network(nn.Module):
+    def __init__(self):
+        super().__init__()
+
+    def forward(self, input):
+        output = input + 1
+        return output
+    
+if __name__ == '__main__':
+    net = Network()
+    input = torch.tensor(1.0)
+    output = net(input)
+    print(output)
 ```
 
