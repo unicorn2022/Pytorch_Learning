@@ -237,11 +237,81 @@ if __name__ == '__main__':
 
 > torch.nn是对torch.nn.functional的封装
 
-### 5.2.1	卷积操作
+### 5.2.1	卷积操作：`F.conv2d(...)`
 
-<img src="AssetMarkdown/image-20240221130213085.png" alt="image-20240221130213085" style="zoom:80%;" />
+- **convolution** 
 
-<img src="AssetMarkdown/image-20240221131633782.png" alt="image-20240221131633782" style="zoom:80%;" />
+<table style="width:100%; table-layout:fixed;">
+  <tr>
+    <td><img width="150px" src="gif/no_padding_no_strides.gif"></td>
+    <td><img width="150px" src="gif/arbitrary_padding_no_strides.gif"></td>
+    <td><img width="150px" src="gif/same_padding_no_strides.gif"></td>
+    <td><img width="150px" src="gif/full_padding_no_strides.gif"></td>
+  </tr>
+  <tr>
+    <td>padding=0, stride=1</td>
+    <td>padding=2, stride=1</td>
+    <td>Half padding, stride=1</td>
+    <td>Full padding, stride=1</td>
+  </tr>
+  <tr>
+    <td><img width="150px" src="gif/no_padding_strides.gif"></td>
+    <td><img width="150px" src="gif/padding_strides.gif"></td>
+    <td><img width="150px" src="gif/padding_strides_odd.gif"></td>
+    <td></td>
+  </tr>
+  <tr>
+    <td>padding=0, stride=2</td>
+    <td>padding=1, stride=2</td>
+    <td>padding=1, stride=2 (odd)</td>
+    <td></td>
+  </tr>
+</table>
+
+- **Transposed convolution**
+
+<table style="width:100%; table-layout:fixed;">
+  <tr>
+    <td><img width="150px" src="gif/no_padding_no_strides_transposed.gif"></td>
+    <td><img width="150px" src="gif/arbitrary_padding_no_strides_transposed.gif"></td>
+    <td><img width="150px" src="gif/same_padding_no_strides_transposed.gif"></td>
+    <td><img width="150px" src="gif/full_padding_no_strides_transposed.gif"></td>
+  </tr>
+  <tr>
+    <td>padding=0, stride=1, transposed</td>
+    <td>Arbitrary padding, stride=1, transposed</td>
+    <td>Half padding, stride=1, transposed</td>
+    <td>Full padding, stride=1, transposed</td>
+  </tr>
+  <tr>
+    <td><img width="150px" src="gif/no_padding_strides_transposed.gif"></td>
+    <td><img width="150px" src="gif/padding_strides_transposed.gif"></td>
+    <td><img width="150px" src="gif/padding_strides_odd_transposed.gif"></td>
+    <td></td>
+  </tr>
+  <tr>
+    <td>padding=0, strides, transposed</td>
+    <td>Padding, strides, transposed</td>
+    <td>Padding, strides, transposed (odd)</td>
+    <td></td>
+  </tr>
+</table>
+
+- **Dilated convolution**
+
+<table style="width:25%"; table-layout:fixed;>
+  <tr>
+    <td><img width="150px" src="gif/dilation.gif"></td>
+  </tr>
+  <tr>
+    <td>padding=0, stride=1, dilation</td>
+  </tr>
+</table>
+
+- `input`：输入 (batch_size, in_channel, input_H, input_W)
+- `weight`： 卷积核  (out_channel, in_channel/groups, kernel_H, kernel_W)
+- `stride=1`：步长
+- `padding=0`：填充
 
 ```python
 import torch
@@ -264,11 +334,60 @@ input = input.view(1, 1, 5, 5)
 
 kernel = kernel.view(1, 1, 3, 3)
 
-output = F.conv2d(
-    input=input,   # 输入:     (batch_size, in_channel, input_H, input_W)
-    weight=kernel, # 卷积核:   (out_channel, in_channel/groups, kernel_H, kernel_W)
-    stride=1,      # 步长
-    padding=1,     # 填充
-)
+output = F.conv2d(input, kernel, stride=1, padding=1)
+```
+
+### 5.2.2	卷积层：`nn.Conv2d(...)`
+
+https://pytorch.org/docs/stable/generated/torch.nn.Conv2d.html#torch.nn.Conv2d
+
+- `in_channels`：输入图像的通道数（彩色图像通常为3个）
+- `out_channels`：输出图像的通道数
+- `kernel_size`： 卷积核大小
+  - 在给定卷积核大小后，初始卷积核权重是从某个特定分布中采样出来的
+  - 后续训练时，会改变卷积核权重
+- `stride=1`：步长
+- `padding=0`：填充
+- `dilation=1`：卷积核每个位之间的距离【通常为1】
+- `groups=1`：分组卷积的分组数【通常为1】
+- `bias=True`：是否有偏置【通常为True】
+- `padding_mode='zeros'`：填充的默认值
+
+> <img src="AssetMarkdown/image-20240221224207612.png" alt="image-20240221224207612" style="zoom:80%;" />
+
+```python
+import torch
+import torchvision
+from torch import nn
+from torch.utils.data import DataLoader
+from torch.utils.tensorboard import SummaryWriter
+
+class MyModel(nn.Module):
+    def __init__(self):
+        super(MyModel, self).__init__()
+        self.conv1 = nn.Conv2d(in_channels=3, out_channels=6, kernel_size=3, stride=1, padding=0 )
+    
+    def forward(self, x):
+        x = self.conv1(x)
+        return x
+
+if __name__ == '__main__':
+    dataset = torchvision.datasets.CIFAR10(root='./dataset', train=False, transform=torchvision.transforms.ToTensor(), download=True)
+    dataloader = DataLoader(dataset, batch_size=64)
+    model = MyModel()
+
+    writer = SummaryWriter('./logs')
+    step = 0
+    for data in dataloader:
+        # img: [64, 3, 32, 32]
+        img, target = data
+        # output: [64, 6, 30, 30]
+        output = model(img)
+        # output: [xxx, 3, 30, 30]
+        output = torch.reshape(output, (-1, 3, 30, 30))
+
+        writer.add_images('input', img, step)
+        writer.add_images('output', output, step)
+        step += 1
 ```
 
