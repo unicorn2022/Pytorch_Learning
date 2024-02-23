@@ -216,21 +216,34 @@ https://pytorch.org/docs/stable/generated/torch.nn.Module.html#torch.nn.Module
 
 ```python
 import torch
-import torch.nn as nn
+import torchvision
+from torch import nn
+from torch.utils.data import DataLoader
+from torch.utils.tensorboard import SummaryWriter
 
-class Network(nn.Module):
+class MyModel(nn.Module):
     def __init__(self):
         super().__init__()
 
     def forward(self, input):
         output = input + 1
         return output
-    
+
 if __name__ == '__main__':
-    net = Network()
-    input = torch.tensor(1.0)
-    output = net(input)
-    print(output)
+    dataset = torchvision.datasets.CIFAR10(root='./dataset', train=False, transform=torchvision.transforms.ToTensor(), download=True)
+    dataloader = DataLoader(dataset, batch_size=64)
+    model = MyModel()
+
+    writer = SummaryWriter('./logs')
+    step = 0
+    for data in dataloader:
+        img, target = data
+        output = model(img)
+
+        writer.add_images('input', img, step)
+        writer.add_images('output', output, step)
+        step += 1
+    writer.close()
 ```
 
 ## 5.2	卷积层：`nn.Conv2d(...)`
@@ -358,12 +371,6 @@ https://pytorch.org/docs/stable/generated/torch.nn.Conv2d.html#torch.nn.Conv2d
 ### 5.2.3	使用示例
 
 ```python
-import torch
-import torchvision
-from torch import nn
-from torch.utils.data import DataLoader
-from torch.utils.tensorboard import SummaryWriter
-
 class MyModel(nn.Module):
     def __init__(self):
         super(MyModel, self).__init__()
@@ -372,26 +379,6 @@ class MyModel(nn.Module):
     def forward(self, x):
         x = self.conv1(x)
         return x
-
-if __name__ == '__main__':
-    dataset = torchvision.datasets.CIFAR10(root='./dataset', train=False, transform=torchvision.transforms.ToTensor(), download=True)
-    dataloader = DataLoader(dataset, batch_size=64)
-    model = MyModel()
-
-    writer = SummaryWriter('./logs')
-    step = 0
-    for data in dataloader:
-        # img: [64, 3, 32, 32]
-        img, target = data
-        # output: [64, 6, 30, 30]
-        output = model(img)
-        # output: [xxx, 3, 30, 30]
-        output = torch.reshape(output, (-1, 3, 30, 30))
-
-        writer.add_images('input', img, step)
-        writer.add_images('output', output, step)
-        step += 1
-    writer.close()
 ```
 
 ## 5.3	最大池化层：`nn.MaxPool2d(...)`
@@ -420,12 +407,6 @@ https://pytorch.org/docs/stable/generated/torch.nn.MaxPool2d.html#torch.nn.MaxPo
 ### 5.3.3	使用示例
 
 ```python
-import torch
-import torch.nn as nn
-import torchvision
-from torch.utils.data import DataLoader
-from torch.utils.tensorboard import SummaryWriter
-
 class MyModel(nn.Module):
     def __init__(self):
         super(MyModel, self).__init__()
@@ -434,21 +415,50 @@ class MyModel(nn.Module):
     def forward(self, x):
         x = self.maxpool1(x)
         return x
-    
-if __name__ == '__main__':
-    dataset = torchvision.datasets.CIFAR10(root='./dataset', train=False, transform=torchvision.transforms.ToTensor(), download=True)
-    dataloader = DataLoader(dataset, batch_size=64)
-    model = MyModel()
+```
 
-    writer = SummaryWriter('./logs')
-    step = 0
-    for data in dataloader:
-        img, target = data
-        output = model(img)
+## 5.4	非线性激活层
 
-        writer.add_images("input", img, step)
-        writer.add_images("output", output, step)
-        step += 1
-    writer.close()
+https://pytorch.org/docs/stable/nn.html#non-linear-activations-weighted-sum-nonlinearity
+
+作用：为网络引入非线性特征，便于学习
+
+- `inplace=False`：是否修改input的值
+
+### 5.4.1	ReLU：`nn.ReLU(inplace=False)`
+
+https://pytorch.org/docs/stable/generated/torch.nn.ReLU.html#torch.nn.ReLU
+
+<img src="AssetMarkdown/ReLU.png" alt="../_images/ReLU.png" style="zoom:80%;" />
+
+```python
+m = nn.ReLU()
+input = torch.randn(2)
+output = m(input)
+```
+
+### 5.4.2	Sigmoid：`nn.Sigmoid(inplace=False)`
+
+https://pytorch.org/docs/stable/generated/torch.nn.Sigmoid.html#torch.nn.Sigmoid
+
+<img src="AssetMarkdown/Sigmoid.png" alt="../_images/Sigmoid.png" style="zoom:67%;" />
+
+```python
+m = nn.Sigmoid()
+input = torch.randn(2)
+output = m(input)
+```
+
+### 5.4.3	使用示例
+
+```python
+class MyModel(nn.Module):
+    def __init__(self):
+        super(MyModel, self).__init__()
+        self.relu = nn.ReLU()
+        self.sigmoid = nn.Sigmoid()
+    def forward(self, x):
+        x = self.sigmoid(x)
+        return x
 ```
 
