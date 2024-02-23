@@ -180,25 +180,90 @@ import torchvision.datasets
 
 ## 4.1	CIFAR10数据集
 
+https://pytorch.org/vision/stable/generated/torchvision.datasets.CIFAR10.html#torchvision.datasets.CIFAR10
+
+https://www.cs.toronto.edu/~kriz/cifar.html
+
+<img src="AssetMarkdown/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5pS-54mb5YS_,size_20,color_FFFFFF,t_70,g_se,x_16.png" alt="基于CIFAR10的完整模型训练套路_dataset = torchvision.datasets.cifar10(&quot;../data ..." style="zoom:80%;" />
+
 ```python
-import torchvision
-from torchvision import transforms
+import torch
+import torch.nn as nn
 from torch.utils.tensorboard import SummaryWriter
 
-dataset_transform = transforms.Compose([
-    transforms.ToTensor()
-])
+class MyModel(nn.Module):
+    def __init__(self):
+        super(MyModel, self).__init__()
+        # input: 3 @ 32 x 32
+        self.conv1 = nn.Conv2d(in_channels=3, out_channels=32, kernel_size=5, padding=2)
+        # feature map: 32 @ 32 x 32
+        self.maxpool1 = nn.MaxPool2d(kernel_size=2)
+        # feature map: 32 @ 16 x 16
+        self.conv2 = nn.Conv2d(in_channels=32, out_channels=32, kernel_size=5, padding=2)
+        # feature map: 32 @ 16 x 16
+        self.maxpool2 = nn.MaxPool2d(kernel_size=2)
+        # feature map: 32 @ 8 x 8
+        self.conv3 = nn.Conv2d(in_channels=32, out_channels=64, kernel_size=5, padding=2)
+        # feature map: 64 @ 8 x 8
+        self.maxpool3 = nn.MaxPool2d(kernel_size=2)
+        # feature map: 64 @ 4 x 4
+        self.flatten = nn.Flatten()
+        # hidden units: 1024
+        self.linear1 = nn.Linear(in_features=1024, out_features=64)
+        # hidden units: 64
+        self.linear2 = nn.Linear(in_features=64, out_features=10)
+        # output: 10
+
+    def forward(self, x):
+        x = self.conv1(x)
+        x = self.maxpool1(x)
+        x = self.conv2(x)
+        x = self.maxpool2(x)
+        x = self.conv3(x)
+        x = self.maxpool3(x)
+        x = self.flatten(x)
+        x = self.linear1(x)
+        x = self.linear2(x)
+        return x
+    
+if __name__ == '__main__':
+    model = MyModel()
+    print(model)
+    
+    # 检验模型是否合法, 输入为: (batch_size, 3, 32, 32)
+    input = torch.ones((64, 3, 32, 32))
+    output = model(input)
+    # 输出应为: (batch_size, 10)
+    print(output.shape)
+
+    # 输出模型
+    writer = SummaryWriter('./logs')
+    writer.add_graph(model=model, input_to_model=input)
+    writer.close()
+```
+
+```python
+import torch
+import torchvision
+from torchvision import transforms
+from torch.utils.data import DataLoader
+from torch.utils.tensorboard import SummaryWriter
 
 # 使用torchvision数据集, 如果没有则下载
-train_set = torchvision.datasets.CIFAR10(root='./dataset', train=True, transform=dataset_transform, download=True)
-test_set = torchvision.datasets.CIFAR10(root='./dataset', train=False, transform=dataset_transform, download=True)
+train_set = torchvision.datasets.CIFAR10(root='./dataset', train=True, transform=transforms.ToTensor(), download=True)
+test_set = torchvision.datasets.CIFAR10(root='./dataset', train=False, transform=transforms.ToTensor(), download=True)
+
+# 使用DataLoader导入数据集
+dataloader = DataLoader(dataset, batch_size=64)
 
 # 将数据集显示到tensorboard中
-writter = SummaryWriter('./logs')
-for i in range(10):
-    img_tensor, label = train_set[i]
-    writter.add_image('train_set', img_tensor, i)
-writter.close()
+writer = SummaryWriter('./logs')
+step = 0
+for data in dataloader:
+    img, target = data
+    writer.add_images('input', img, step)
+    step += 1
+    writer.close()
 ```
 
 # 五、神经网络的搭建
