@@ -1,3 +1,5 @@
+# 目录
+
 [TOC]
 
 # 一、准备数据：Dataset & Dataloader
@@ -468,7 +470,7 @@ class MyModel(nn.Module):
 
 ## 5.5	正则化层：加快网络训练
 
-### 5.5.1	`nn.BatchNorm2d(...)`
+### 5.5.1	正则化层：`nn.BatchNorm2d(...)`
 
 https://pytorch.org/docs/stable/generated/torch.nn.BatchNorm2d.html#torch.nn.BatchNorm2d
 
@@ -482,14 +484,75 @@ input = torch.randn(20, 100, 35, 45)
 output = m(input)
 ```
 
-## 5.6	Recurrent层：RNN相关算子
+## 5.6	Recurrent层：RNN算子
 
 https://pytorch.org/docs/stable/nn.html#recurrent-layers
 
-## 5.7	Transformer层：Transformer相关算子
+## 5.7	Transformer层：Transformer算子
 
 https://pytorch.org/docs/stable/nn.html#transformer-layers
 
-## 5.8	线性层：`nn.Linear`
+## 5.8	线性层：全连接层
 
 https://pytorch.org/docs/stable/nn.html#linear-layers
+
+<img src="AssetMarkdown/image-20240223182127340.png" alt="image-20240223182127340" style="zoom:80%;" />
+
+### 5.8.1	线性层：`nn.Linear(...)`
+
+- `in_features`：每个样本输入的特征数量
+- `out_features`：每个样本输出的特征数量
+- `bias=True`：是否有偏置
+
+> <img src="AssetMarkdown/image-20240223182151108.png" alt="image-20240223182151108" style="zoom:80%;" />
+
+### 5.8.2	使用示例
+
+```python
+class MyModel(nn.Module):
+    def __init__(self):
+        super(MyModel, self).__init__()
+        self.linear = nn.Linear(196608, 10)
+
+    def forward(self, x):
+        x = self.linear(x)
+        return x
+```
+
+```python
+# 将多维数组展开为一维
+img = torch.flatten(img)
+```
+
+## 5.9	Dropout层：防止过拟合
+
+https://pytorch.org/docs/stable/nn.html#dropout-layers
+
+## 5.10	Embedding层：NLP算子
+
+https://pytorch.org/docs/stable/nn.html#sparse-layers
+
+## 5.11	距离函数：计算两个值之间的误差
+
+https://pytorch.org/docs/stable/nn.html#distance-functions
+
+## 5.12	损失函数
+
+https://pytorch.org/docs/stable/nn.html#loss-functions
+
+# 六、已有模型
+
+## 6.1	语音处理模型：`torchaudio.models`
+
+https://pytorch.org/audio/stable/models.html
+
+## 6.2	文本处理模型：`torchtext.models`
+
+https://pytorch.org/text/stable/models.html
+
+## 6.3	图像处理模型：`torchvision.models`
+
+https://pytorch.org/vision/stable/models.html
+
+
+
