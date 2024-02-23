@@ -201,7 +201,7 @@ for i in range(10):
 writter.close()
 ```
 
-# 五、神经网络的搭建：torch.nn
+# 五、神经网络的搭建
 
 https://pytorch.org/docs/stable/nn.html
 
@@ -209,7 +209,7 @@ https://pytorch.org/docs/stable/nn.html
 import torch.nn
 ```
 
-## 5.1	nn.Module：神经网络的模板
+## 5.1	`nn.Module`：神经网络的模板
 
 https://pytorch.org/docs/stable/generated/torch.nn.Module.html#torch.nn.Module
 
@@ -250,13 +250,35 @@ if __name__ == '__main__':
     writer.close()
 ```
 
-## 5.2	卷积层：卷积操作
+## 5.2	`nn.Sequential`：合并多个操作
+
+https://pytorch.org/docs/stable/generated/torch.nn.Sequential.html#torch.nn.Sequential
+
+```python
+model = nn.Sequential(
+    nn.Conv2d(1,20,5),
+    nn.ReLU(),
+    nn.Conv2d(20,64,5),
+    nn.ReLU()
+)
+
+model = nn.Sequential(OrderedDict([
+    ('conv1', nn.Conv2d(1,20,5)),
+    ('relu1', nn.ReLU()),
+    ('conv2', nn.Conv2d(20,64,5)),
+    ('relu2', nn.ReLU())
+]))
+```
+
+# 六、Pytorch算子
+
+## 6.1	卷积层：卷积操作
 
 https://pytorch.org/docs/stable/nn.html#convolution-layers
 
 > torch.nn是对torch.nn.functional的封装
 
-### 5.2.1	卷积操作：`F.conv2d(...)`
+### 6.1.1	卷积操作：`F.conv2d(...)`
 
 - **convolution**：卷积
 
@@ -356,7 +378,7 @@ kernel = kernel.view(1, 1, 3, 3)
 output = F.conv2d(input, kernel, stride=1, padding=1)
 ```
 
-### 5.2.2	卷积层：`nn.Conv2d(...)`
+### 6.1.2	卷积层：`nn.Conv2d(...)`
 
 https://pytorch.org/docs/stable/generated/torch.nn.Conv2d.html#torch.nn.Conv2d
 
@@ -374,7 +396,7 @@ https://pytorch.org/docs/stable/generated/torch.nn.Conv2d.html#torch.nn.Conv2d
 
 > <img src="AssetMarkdown/image-20240221224207612.png" alt="image-20240221224207612" style="zoom:80%;" />
 
-### 5.2.3	使用示例
+### 6.1.3	使用示例
 
 ```python
 class MyModel(nn.Module):
@@ -387,7 +409,7 @@ class MyModel(nn.Module):
         return x
 ```
 
-## 5.3	池化层：采样操作
+## 6.2	池化层：采样操作
 
 https://pytorch.org/docs/stable/nn.html#pooling-layers
 
@@ -395,11 +417,11 @@ https://pytorch.org/docs/stable/nn.html#pooling-layers
 >
 > 作用：保留数据特征，同时减小数据量
 
-### 5.3.1	最大池化操作
+### 6.2.1	最大池化操作
 
 <img src="AssetMarkdown/image-20240221225414973.png" alt="image-20240221225414973" style="zoom:80%;" />
 
-### 5.3.2	最大池化层：`nn.MaxPool2d(...)`
+### 6.2.2	最大池化层：`nn.MaxPool2d(...)`
 
 https://pytorch.org/docs/stable/generated/torch.nn.MaxPool2d.html#torch.nn.MaxPool2d
 
@@ -412,7 +434,7 @@ https://pytorch.org/docs/stable/generated/torch.nn.MaxPool2d.html#torch.nn.MaxPo
 
 > <img src="AssetMarkdown/image-20240221224647313.png" alt="image-20240221224647313" style="zoom:80%;" />
 
-### 5.3.3	使用示例
+### 6.2.3	使用示例
 
 ```python
 class MyModel(nn.Module):
@@ -425,13 +447,13 @@ class MyModel(nn.Module):
         return x
 ```
 
-## 5.4	非线性激活层：引入非线性特征
+## 6.3	非线性激活层：引入非线性特征
 
 https://pytorch.org/docs/stable/nn.html#non-linear-activations-weighted-sum-nonlinearity
 
 - `inplace=False`：是否修改input的值
 
-### 5.4.1	ReLU：`nn.ReLU(inplace=False)`
+### 6.3.1	ReLU：`nn.ReLU(inplace=False)`
 
 https://pytorch.org/docs/stable/generated/torch.nn.ReLU.html#torch.nn.ReLU
 
@@ -443,7 +465,7 @@ input = torch.randn(2)
 output = m(input)
 ```
 
-### 5.4.2	Sigmoid：`nn.Sigmoid(inplace=False)`
+### 6.3.2	Sigmoid：`nn.Sigmoid(inplace=False)`
 
 https://pytorch.org/docs/stable/generated/torch.nn.Sigmoid.html#torch.nn.Sigmoid
 
@@ -455,7 +477,7 @@ input = torch.randn(2)
 output = m(input)
 ```
 
-### 5.4.3	使用示例
+### 6.3.3	使用示例
 
 ```python
 class MyModel(nn.Module):
@@ -468,9 +490,9 @@ class MyModel(nn.Module):
         return x
 ```
 
-## 5.5	正则化层：加快网络训练
+## 6.4	正则化层：加快网络训练
 
-### 5.5.1	正则化层：`nn.BatchNorm2d(...)`
+### 6.4.1	正则化层：`nn.BatchNorm2d(...)`
 
 https://pytorch.org/docs/stable/generated/torch.nn.BatchNorm2d.html#torch.nn.BatchNorm2d
 
@@ -484,21 +506,21 @@ input = torch.randn(20, 100, 35, 45)
 output = m(input)
 ```
 
-## 5.6	Recurrent层：RNN算子
+## 6.5	Recurrent层：RNN算子
 
 https://pytorch.org/docs/stable/nn.html#recurrent-layers
 
-## 5.7	Transformer层：Transformer算子
+## 6.6	Transformer层：Transformer算子
 
 https://pytorch.org/docs/stable/nn.html#transformer-layers
 
-## 5.8	线性层：全连接层
+## 6.7	线性层：全连接层
 
 https://pytorch.org/docs/stable/nn.html#linear-layers
 
 <img src="AssetMarkdown/image-20240223182127340.png" alt="image-20240223182127340" style="zoom:80%;" />
 
-### 5.8.1	线性层：`nn.Linear(...)`
+### 6.7.1	线性层：`nn.Linear(...)`
 
 - `in_features`：每个样本输入的特征数量
 - `out_features`：每个样本输出的特征数量
@@ -506,7 +528,7 @@ https://pytorch.org/docs/stable/nn.html#linear-layers
 
 > <img src="AssetMarkdown/image-20240223182151108.png" alt="image-20240223182151108" style="zoom:80%;" />
 
-### 5.8.2	使用示例
+### 6.7.2	使用示例
 
 ```python
 class MyModel(nn.Module):
@@ -524,33 +546,33 @@ class MyModel(nn.Module):
 img = torch.flatten(img)
 ```
 
-## 5.9	Dropout层：防止过拟合
+## 6.8	Dropout层：防止过拟合
 
 https://pytorch.org/docs/stable/nn.html#dropout-layers
 
-## 5.10	Embedding层：NLP算子
+## 6.9	Embedding层：NLP算子
 
 https://pytorch.org/docs/stable/nn.html#sparse-layers
 
-## 5.11	距离函数：计算两个值之间的误差
+## 6.10	距离函数：计算两个值之间的误差
 
 https://pytorch.org/docs/stable/nn.html#distance-functions
 
-## 5.12	损失函数
+## 6.11	损失函数
 
 https://pytorch.org/docs/stable/nn.html#loss-functions
 
-# 六、已有模型
+# 七、已有模型
 
-## 6.1	语音处理模型：`torchaudio.models`
+## 7.1	语音处理模型：`torchaudio.models`
 
 https://pytorch.org/audio/stable/models.html
 
-## 6.2	文本处理模型：`torchtext.models`
+## 7.2	文本处理模型：`torchtext.models`
 
 https://pytorch.org/text/stable/models.html
 
-## 6.3	图像处理模型：`torchvision.models`
+## 7.3	图像处理模型：`torchvision.models`
 
 https://pytorch.org/vision/stable/models.html
 
