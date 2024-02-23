@@ -237,7 +237,9 @@ if __name__ == '__main__':
     writer = SummaryWriter('./logs')
     step = 0
     for data in dataloader:
+        # input:  [batch_size, in_feature_num,  in_H,  in_W ]
         img, target = data
+        # output: [batch_size, out_feature_num, out_H, out_W]
         output = model(img)
 
         writer.add_images('input', img, step)
@@ -246,7 +248,9 @@ if __name__ == '__main__':
     writer.close()
 ```
 
-## 5.2	卷积层：`nn.Conv2d(...)`
+## 5.2	卷积层：卷积操作
+
+https://pytorch.org/docs/stable/nn.html#convolution-layers
 
 > torch.nn是对torch.nn.functional的封装
 
@@ -381,7 +385,9 @@ class MyModel(nn.Module):
         return x
 ```
 
-## 5.3	最大池化层：`nn.MaxPool2d(...)`
+## 5.3	池化层：采样操作
+
+https://pytorch.org/docs/stable/nn.html#pooling-layers
 
 > 可以视为：下采样操作
 >
@@ -417,11 +423,9 @@ class MyModel(nn.Module):
         return x
 ```
 
-## 5.4	非线性激活层
+## 5.4	非线性激活层：引入非线性特征
 
 https://pytorch.org/docs/stable/nn.html#non-linear-activations-weighted-sum-nonlinearity
-
-作用：为网络引入非线性特征，便于学习
 
 - `inplace=False`：是否修改input的值
 
@@ -462,3 +466,30 @@ class MyModel(nn.Module):
         return x
 ```
 
+## 5.5	正则化层：加快网络训练
+
+### 5.5.1	`nn.BatchNorm2d(...)`
+
+https://pytorch.org/docs/stable/generated/torch.nn.BatchNorm2d.html#torch.nn.BatchNorm2d
+
+> <img src="AssetMarkdown/image-20240223121141373.png" alt="image-20240223121141373" style="zoom: 80%;" />
+
+- `num_features`：特征数量，也就是通道数
+
+```python
+m = nn.BatchNorm2d(100)
+input = torch.randn(20, 100, 35, 45)
+output = m(input)
+```
+
+## 5.6	Recurrent层：RNN相关算子
+
+https://pytorch.org/docs/stable/nn.html#recurrent-layers
+
+## 5.7	Transformer层：Transformer相关算子
+
+https://pytorch.org/docs/stable/nn.html#transformer-layers
+
+## 5.8	线性层：`nn.Linear`
+
+https://pytorch.org/docs/stable/nn.html#linear-layers
