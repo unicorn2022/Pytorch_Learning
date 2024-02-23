@@ -1,14 +1,14 @@
-# 目录
-
 [TOC]
 
-# 一、准备数据：Dataset & Dataloader
+# 【数据】
+
+## 一、准备数据：Dataset & Dataloader
 
 ```python
 from torch.utils.data import DataLoader, Dataset
 ```
 
-## 1.1	Dataset：提供一种方式，获取data及其label
+### 1.1	Dataset：提供一种方式，获取data及其label
 
 - 初始化：`__init(self, ...)__`
 - 如何获取单个`data`及其`label`：`__getitem__(self, index)`
@@ -37,7 +37,7 @@ class MyDataset(Dataset):
         return len(self.img_name_list)
 ```
 
-## 1.2	Dataloader：将数据打包，提供给网络使用
+### 1.2	Dataloader：将数据打包，提供给网络使用
 
 https://pytorch.org/docs/stable/data.html#torch.utils.data.DataLoader
 
@@ -74,13 +74,13 @@ if __name__ == '__main__':
     writer.close()
 ```
 
-# 二、记录日志：Tensorboard
+## 二、记录日志：Tensorboard
 
 ```python
 from torch.utils.tensorboard import SummaryWriter
 ```
 
-## 2.1	Python生成日志文件
+### 2.1	Python生成日志文件
 
 - 坐标轴：观察网络的`loss`
 
@@ -117,7 +117,7 @@ from torch.utils.tensorboard import SummaryWriter
   )
   ```
 
-## 2.2	使用Tensorboard打开日志文件：
+### 2.2	使用Tensorboard打开日志文件：
 
 ```bash
 tensorboard --logdir=logs --port=6007
@@ -135,7 +135,7 @@ netstat -ano | findstr 6007
 tasklist | findstr 20288
 ```
 
-# 三、数据变换工具箱：Transforms
+## 三、数据变换工具箱：Transforms
 
 ```python
 from torchvision import transforms
@@ -143,7 +143,7 @@ from torchvision import transforms
 
 <img src="AssetMarkdown/image-20240129232207604.png" alt="image-20240129232207604" style="zoom:80%;" />
 
-## 3.1	将PIL图片转为Tensor类型
+### 3.1	将PIL图片转为Tensor类型
 
 ```python
 from torchvision import transforms
@@ -158,7 +158,7 @@ img_tensor = transforms.ToTensor()(img)
 - **Tensor**：包装了神经网络必须的一些属性
 - **ToTensor()**：将PIL、ndarray格式的图片，转化为Tensor格式
 
-## 3.2	常用Transforms
+### 3.2	常用Transforms
 
 - **输入**：
   - **PIL**：`Image.open(path)`
@@ -172,13 +172,13 @@ img_tensor = transforms.ToTensor()(img)
   - **组合多个作用**：`transforms.Compose([transform_1, transform_2...])`
   - **随机裁剪PIL图像**：`transforms.RandomCrop(size)(PILImage)`
 
-# 四、官方数据集：torchvision.datasets
+## 四、官方数据集：torchvision.datasets
 
 ```python
 import torchvision.datasets
 ```
 
-## 4.1	CIFAR10数据集
+### 4.1	CIFAR10数据集
 
 https://pytorch.org/vision/stable/generated/torchvision.datasets.CIFAR10.html#torchvision.datasets.CIFAR10
 
@@ -243,30 +243,38 @@ if __name__ == '__main__':
 ```
 
 ```python
-import torch
 import torchvision
+import torch.nn as nn
 from torchvision import transforms
 from torch.utils.data import DataLoader
 from torch.utils.tensorboard import SummaryWriter
+from nn_CIFAR10 import MyModel
 
-# 使用torchvision数据集, 如果没有则下载
-train_set = torchvision.datasets.CIFAR10(root='./dataset', train=True, transform=transforms.ToTensor(), download=True)
-test_set = torchvision.datasets.CIFAR10(root='./dataset', train=False, transform=transforms.ToTensor(), download=True)
 
-# 使用DataLoader导入数据集
-dataloader = DataLoader(dataset, batch_size=64)
+if __name__ == '__main__':
+    dataset = torchvision.datasets.CIFAR10(root='./dataset', train=False, transform=transforms.ToTensor(), download=True)
+    dataloader = DataLoader(dataset, batch_size=64)
+    model = MyModel()
+    loss = nn.CrossEntropyLoss()
 
-# 将数据集显示到tensorboard中
-writer = SummaryWriter('./logs')
-step = 0
-for data in dataloader:
-    img, target = data
-    writer.add_images('input', img, step)
-    step += 1
-    writer.close()
+    # writer = SummaryWriter('./logs')
+    # step = 0
+    for data in dataloader:
+        img, target = data
+        output = model(img)
+        result_loss = loss(output, target)
+        result_loss.backward()
+        print(result_loss)
+
+        # writer.add_images('input', img, step)
+        # writer.add_images('output', output, step)
+        # step += 1
+    # writer.close()
 ```
 
-# 五、神经网络的搭建
+# 【模型】
+
+## 五、神经网络的搭建
 
 https://pytorch.org/docs/stable/nn.html
 
@@ -274,7 +282,7 @@ https://pytorch.org/docs/stable/nn.html
 import torch.nn
 ```
 
-## 5.1	`nn.Module`：神经网络的模板
+### 5.1	`nn.Module`：神经网络的模板
 
 https://pytorch.org/docs/stable/generated/torch.nn.Module.html#torch.nn.Module
 
@@ -315,7 +323,7 @@ if __name__ == '__main__':
     writer.close()
 ```
 
-## 5.2	`nn.Sequential`：合并多个操作
+### 5.2	`nn.Sequential`：合并多个操作
 
 https://pytorch.org/docs/stable/generated/torch.nn.Sequential.html#torch.nn.Sequential
 
@@ -335,15 +343,15 @@ model = nn.Sequential(OrderedDict([
 ]))
 ```
 
-# 六、Pytorch算子
+## 六、Pytorch算子
 
-## 6.1	卷积层：卷积操作
+### 6.1	卷积层：卷积操作
 
 https://pytorch.org/docs/stable/nn.html#convolution-layers
 
 > torch.nn是对torch.nn.functional的封装
 
-### 6.1.1	卷积操作：`F.conv2d(...)`
+#### 6.1.1	卷积操作：`F.conv2d(...)`
 
 - **convolution**：卷积
 
@@ -443,7 +451,7 @@ kernel = kernel.view(1, 1, 3, 3)
 output = F.conv2d(input, kernel, stride=1, padding=1)
 ```
 
-### 6.1.2	卷积层：`nn.Conv2d(...)`
+#### 6.1.2	卷积层：`nn.Conv2d(...)`
 
 https://pytorch.org/docs/stable/generated/torch.nn.Conv2d.html#torch.nn.Conv2d
 
@@ -461,7 +469,7 @@ https://pytorch.org/docs/stable/generated/torch.nn.Conv2d.html#torch.nn.Conv2d
 
 > <img src="AssetMarkdown/image-20240221224207612.png" alt="image-20240221224207612" style="zoom:80%;" />
 
-### 6.1.3	使用示例
+#### 6.1.3	使用示例
 
 ```python
 class MyModel(nn.Module):
@@ -474,7 +482,7 @@ class MyModel(nn.Module):
         return x
 ```
 
-## 6.2	池化层：采样操作
+### 6.2	池化层：采样操作
 
 https://pytorch.org/docs/stable/nn.html#pooling-layers
 
@@ -482,11 +490,11 @@ https://pytorch.org/docs/stable/nn.html#pooling-layers
 >
 > 作用：保留数据特征，同时减小数据量
 
-### 6.2.1	最大池化操作
+#### 6.2.1	最大池化操作
 
 <img src="AssetMarkdown/image-20240221225414973.png" alt="image-20240221225414973" style="zoom:80%;" />
 
-### 6.2.2	最大池化层：`nn.MaxPool2d(...)`
+#### 6.2.2	最大池化层：`nn.MaxPool2d(...)`
 
 https://pytorch.org/docs/stable/generated/torch.nn.MaxPool2d.html#torch.nn.MaxPool2d
 
@@ -499,7 +507,7 @@ https://pytorch.org/docs/stable/generated/torch.nn.MaxPool2d.html#torch.nn.MaxPo
 
 > <img src="AssetMarkdown/image-20240221224647313.png" alt="image-20240221224647313" style="zoom:80%;" />
 
-### 6.2.3	使用示例
+#### 6.2.3	使用示例
 
 ```python
 class MyModel(nn.Module):
@@ -512,13 +520,13 @@ class MyModel(nn.Module):
         return x
 ```
 
-## 6.3	非线性激活层：引入非线性特征
+### 6.3	非线性激活层：引入非线性特征
 
 https://pytorch.org/docs/stable/nn.html#non-linear-activations-weighted-sum-nonlinearity
 
 - `inplace=False`：是否修改input的值
 
-### 6.3.1	ReLU：`nn.ReLU(inplace=False)`
+#### 6.3.1	ReLU：`nn.ReLU(inplace=False)`
 
 https://pytorch.org/docs/stable/generated/torch.nn.ReLU.html#torch.nn.ReLU
 
@@ -530,7 +538,7 @@ input = torch.randn(2)
 output = m(input)
 ```
 
-### 6.3.2	Sigmoid：`nn.Sigmoid(inplace=False)`
+#### 6.3.2	Sigmoid：`nn.Sigmoid(inplace=False)`
 
 https://pytorch.org/docs/stable/generated/torch.nn.Sigmoid.html#torch.nn.Sigmoid
 
@@ -542,7 +550,7 @@ input = torch.randn(2)
 output = m(input)
 ```
 
-### 6.3.3	使用示例
+#### 6.3.3	使用示例
 
 ```python
 class MyModel(nn.Module):
@@ -555,9 +563,9 @@ class MyModel(nn.Module):
         return x
 ```
 
-## 6.4	正则化层：加快网络训练
+### 6.4	正则化层：加快网络训练
 
-### 6.4.1	正则化层：`nn.BatchNorm2d(...)`
+#### 6.4.1	正则化层：`nn.BatchNorm2d(...)`
 
 https://pytorch.org/docs/stable/generated/torch.nn.BatchNorm2d.html#torch.nn.BatchNorm2d
 
@@ -571,21 +579,21 @@ input = torch.randn(20, 100, 35, 45)
 output = m(input)
 ```
 
-## 6.5	Recurrent层：RNN算子
+### 6.5	Recurrent层：RNN算子
 
 https://pytorch.org/docs/stable/nn.html#recurrent-layers
 
-## 6.6	Transformer层：Transformer算子
+### 6.6	Transformer层：Transformer算子
 
 https://pytorch.org/docs/stable/nn.html#transformer-layers
 
-## 6.7	线性层：全连接层
+### 6.7	线性层：全连接层
 
 https://pytorch.org/docs/stable/nn.html#linear-layers
 
 <img src="AssetMarkdown/image-20240223182127340.png" alt="image-20240223182127340" style="zoom:80%;" />
 
-### 6.7.1	线性层：`nn.Linear(...)`
+#### 6.7.1	线性层：`nn.Linear(...)`
 
 - `in_features`：每个样本输入的特征数量
 - `out_features`：每个样本输出的特征数量
@@ -593,7 +601,7 @@ https://pytorch.org/docs/stable/nn.html#linear-layers
 
 > <img src="AssetMarkdown/image-20240223182151108.png" alt="image-20240223182151108" style="zoom:80%;" />
 
-### 6.7.2	使用示例
+#### 6.7.2	使用示例
 
 ```python
 class MyModel(nn.Module):
@@ -611,35 +619,81 @@ class MyModel(nn.Module):
 img = torch.flatten(img)
 ```
 
-## 6.8	Dropout层：防止过拟合
+### 6.8	Dropout层：防止过拟合
 
 https://pytorch.org/docs/stable/nn.html#dropout-layers
 
-## 6.9	Embedding层：NLP算子
+### 6.9	Embedding层：NLP算子
 
 https://pytorch.org/docs/stable/nn.html#sparse-layers
 
-## 6.10	距离函数：计算两个值之间的误差
+### 6.10	距离函数：计算两个值之间的误差
 
 https://pytorch.org/docs/stable/nn.html#distance-functions
 
-## 6.11	损失函数
+### 6.11	损失函数
 
 https://pytorch.org/docs/stable/nn.html#loss-functions
 
-# 七、已有模型
+## 七、Pytorch预训练模型
 
-## 7.1	语音处理模型：`torchaudio.models`
+### 7.1	语音处理模型：`torchaudio.models`
 
 https://pytorch.org/audio/stable/models.html
 
-## 7.2	文本处理模型：`torchtext.models`
+### 7.2	文本处理模型：`torchtext.models`
 
 https://pytorch.org/text/stable/models.html
 
-## 7.3	图像处理模型：`torchvision.models`
+### 7.3	图像处理模型：`torchvision.models`
 
 https://pytorch.org/vision/stable/models.html
 
+# 【训练】
 
+## 八、损失函数&反向传播
 
+### 8.1	L1Loss平均损失：`nn.L1Liss(...)`
+
+https://pytorch.org/docs/stable/generated/torch.nn.L1Loss.html#torch.nn.L1Loss
+
+```python
+loss = nn.L1Loss()
+input = torch.randn(3, 5, requires_grad=True)
+target = torch.randn(3, 5)
+result_loss = loss(input, target)
+result_loss.backward()
+```
+
+### 8.2	MSE平方差损失：`nn.MSELoss(...)`
+
+https://pytorch.org/docs/stable/generated/torch.nn.MSELoss.html#torch.nn.MSELoss
+
+```python
+loss = nn.MSELoss()
+input = torch.randn(3, 5, requires_grad=True)
+target = torch.randn(3, 5)
+result_loss = loss(input, target)
+result_loss.backward()
+```
+
+### 8.3	CrossEntropyLoss交叉熵损失：`nn.CrossEntropyLoss(...)`
+
+https://pytorch.org/docs/stable/generated/torch.nn.CrossEntropyLoss.html#torch.nn.CrossEntropyLoss
+
+<img src="AssetMarkdown/image-20240223214933006.png" alt="image-20240223214933006" style="zoom:80%;" />
+
+```python
+input = torch.tensor([0.1, 0.2, 0.3]).view(1, 3)
+target = torch.tensor([1])
+result_loss = nn.CrossEntropyLoss()(input, target)
+result_loss.backward()
+```
+
+### 8.4	反向传播：`result_loss.backward()`
+
+```python
+result_loss.backward()
+```
+
+## 九、优化器
