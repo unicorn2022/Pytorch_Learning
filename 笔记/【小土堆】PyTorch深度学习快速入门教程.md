@@ -724,3 +724,45 @@ optim.step()
 ```
 
 # 【模型的保存与读取】
+
+## 一、现有网络模型的使用和修改
+
+### 1.1	VGG16模型 & ImageNet数据集
+
+VGG16模型：https://pytorch.org/vision/stable/models/generated/torchvision.models.vgg16.html#torchvision.models.vgg16
+
+ImageNet数据集：https://pytorch.org/vision/stable/generated/torchvision.datasets.ImageNet.html#torchvision.datasets.ImageNet
+
+```python
+# 载入预训练模型
+vgg16 = models.vgg16(weights=models.VGG16_Weights.IMAGENET1K_V1)
+# 在已有模型后面添加层
+vgg16.add_module('on_CIFAR10', nn.Linear(1000, 10))
+# 修改已有模型中的层
+vgg16.classifier[6] = nn.Linear(4096, 10)
+```
+
+## 二、模型的保存与读取
+
+### 2.1	保存结构+参数：pth
+
+- 加载时，需要给出自定义网络结构的声明
+
+```python
+# 保存&加载模型(pth): 保存结构+参数
+torch.save(vgg16, 'vgg16.pth')
+model = torch.load('vgg16.pth')
+```
+
+### 2.2	保存参数：state_dict
+
+- 以字典格式保存网络的参数
+- 需要先实例化网络，然后再导入参数
+
+```python
+# 保存&加载模型(state_dict): 保存参数
+torch.save(vgg16.state_dict(), 'vgg16_state_dict.pth')
+model = models.vgg16().load_state_dict(torch.load('vgg16_state_dict.pth'))
+```
+
+# 【完整的模型训练套路】
