@@ -6,6 +6,8 @@ from torch.utils.data import DataLoader
 from torch.utils.tensorboard import SummaryWriter
 from nn_CIFAR10 import MyModel
 
+device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+
 # 数据集
 dataset_path = './dataset'
 dataset_transform = transforms.ToTensor()
@@ -19,10 +21,10 @@ dataloader_train = DataLoader(dataset_train, batch_size=64, shuffle=True, num_wo
 dataloader_test  = DataLoader(dataset_test,  batch_size=64, shuffle=False, num_workers=0)
 
 # 创建网络模型
-model = MyModel()
+model = MyModel().to(device)
 
 # 创建损失函数
-loss_fn = nn.CrossEntropyLoss()
+loss_fn = nn.CrossEntropyLoss().to(device)
 
 # 创建优化器
 learning_rate = 1e-2
@@ -33,7 +35,7 @@ epoch = 10
 total_train_step = 0
 
 # 使用 tensorboard 记录训练过程
-writer = SummaryWriter(log_dir='./log')
+writer = SummaryWriter(log_dir='./logs')
 
 for i in range(epoch):
     print('-------第 {} 轮训练开始-------'.format(i+1))
@@ -43,6 +45,7 @@ for i in range(epoch):
     for data in dataloader_train:
         # 模型推理
         img, target = data
+        img, target = img.to(device), target.to(device)
         output = model(img)
         loss = loss_fn(output, target)
         # 反向传播
@@ -62,6 +65,7 @@ for i in range(epoch):
     with torch.no_grad(): # 测试时不需要计算梯度
         for data in dataloader_train:
             img, target = data
+            img, target = img.to(device), target.to(device)
             output = model(img)
             # 计算损失
             loss = loss_fn(output, target)
